@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useCallback } from 'react'
+import { apiFetch } from '../lib/api'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Camera, Zap, RotateCcw, Check, Flame, Beef, Wheat, Droplets,
@@ -182,7 +183,7 @@ export default function Scanner({ userId }) {
   const sendToBackend = useCallback(async (imagePayload) => {
     setStage('scanning')
     try {
-      const resp = await fetch('/api/scan', {
+      const resp = await apiFetch('/api/scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ image: imagePayload }),
@@ -269,7 +270,7 @@ export default function Scanner({ userId }) {
           if (match) parsedPortion = parseFloat(match[0]);
         }
 
-        await fetch('/api/daily-logs', {
+        await apiFetch('/api/daily-logs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

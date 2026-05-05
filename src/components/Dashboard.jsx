@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { apiFetch } from '../lib/api'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Flame, Droplets, Beef, Wheat, Settings2,
@@ -230,7 +231,7 @@ function LogItem({ log, onDelete, idx }) {
   const handleDelete = async () => {
     setDeleting(true)
     try {
-      await fetch(`/api/daily-logs/${log.id}`, { method: 'DELETE' })
+      await apiFetch(`/api/daily-logs/${log.id}`, { method: 'DELETE' })
       onDelete(log.id)
     } catch {
       setDeleting(false)
@@ -399,8 +400,8 @@ export default function Dashboard({ persona, onPersonaChange, userId, user, onLo
     if (!userId) return
     setLoading(true)
     Promise.all([
-      fetch(`/api/daily-logs/today/${userId}`).then(r => r.json()),
-      fetch(`/api/daily-logs/weekly/${userId}`).then(r => r.json()),
+      apiFetch(`/api/daily-logs/today/${userId}`).then(r => r.json()),
+      apiFetch(`/api/daily-logs/weekly/${userId}`).then(r => r.json()),
     ]).then(([today, week]) => {
       if (today.macros) { setMacros(today.macros); onMacrosUpdate?.(today.macros) }
       if (today.logs)   setLogs(today.logs)
@@ -415,7 +416,7 @@ export default function Dashboard({ persona, onPersonaChange, userId, user, onLo
   const handleDeleteLog = (id) => {
     setLogs(prev => prev.filter(l => l.id !== id))
     setTimeout(() => {
-      fetch(`/api/daily-logs/today/${userId}`)
+      apiFetch(`/api/daily-logs/today/${userId}`)
         .then(r => r.json())
         .then(d => { if (d.macros) { setMacros(d.macros); onMacrosUpdate?.(d.macros) } })
     }, 300)

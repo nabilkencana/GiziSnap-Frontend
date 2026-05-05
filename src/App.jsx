@@ -26,6 +26,7 @@ const goalToPersona = {
 const EMPTY_MACROS = { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 }
 
 import { supabase } from './lib/supabase';
+import { apiFetch } from './lib/api';
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -70,7 +71,7 @@ export default function App() {
   // ── Fetch macros for sidebar (and Dashboard will also fetch its own) ─────────
   useEffect(() => {
     if (!user?.id) return
-    fetch(`/api/daily-logs/today/${user.id}`)
+    apiFetch(`/api/daily-logs/today/${user.id}`)
       .then(r => r.json())
       .then(d => { if (d.macros) setMacros(d.macros) })
       .catch(() => {})
@@ -88,7 +89,7 @@ export default function App() {
             const name = session.user.user_metadata?.full_name || 'Pengguna Google';
             
             // Hit backend untuk sync
-            const res = await fetch('/api/auth/google', {
+            const res = await apiFetch('/api/auth/google', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email, name })
@@ -127,7 +128,7 @@ export default function App() {
     else if (personaId === 'bodybuilder') goal = 'BODYBUILDING';
 
     try {
-      const res = await fetch(`/api/auth/${user.id}/goal`, {
+      const res = await apiFetch(`/api/auth/${user.id}/goal`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

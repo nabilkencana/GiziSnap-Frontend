@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { apiFetch } from '../lib/api'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ImagePlus, Send, CheckCircle2, AlertCircle, ChevronDown,
@@ -538,7 +539,7 @@ export default function WikiGizi({ userId }) {
     setLoadingFoods(true)
     try {
       const url = q ? `/api/foods?search=${encodeURIComponent(q)}` : '/api/foods'
-      const res = await fetch(url)
+      const res = await apiFetch(url)
       if (res.ok) setFoods(await res.json())
     } catch (e) { console.error('[WikiGizi]', e) }
     finally { setLoadingFoods(false) }
@@ -552,7 +553,7 @@ export default function WikiGizi({ userId }) {
 
   const handleUpvote = async (id) => {
     try {
-      await fetch(`/api/foods/${id}/upvote`, { method: 'PATCH' })
+      await apiFetch(`/api/foods/${id}/upvote`, { method: 'PATCH' })
       setFoods(prev => prev.map(f => f.id === id ? { ...f, upvotes: (f.upvotes || 0) + 1 } : f))
       if (selectedFood?.id === id) setSelectedFood(f => ({ ...f, upvotes: (f.upvotes || 0) + 1 }))
     } catch (e) { console.error(e) }
@@ -606,7 +607,7 @@ export default function WikiGizi({ userId }) {
         setUploadingImage(true)
         const fd = new FormData()
         fd.append('image', form.image)
-        const imgRes = await fetch('/api/foods/upload-image', {
+        const imgRes = await apiFetch('/api/foods/upload-image', {
           method: 'POST',
           body: fd,
         })
@@ -627,7 +628,7 @@ export default function WikiGizi({ userId }) {
         ...(imageUrl ? { imageUrl } : {}),
       }
       if (userId && userId !== 'guest' && userId.length > 10) payload.userId = userId
-      const resp = await fetch('/api/foods', {
+      const resp = await apiFetch('/api/foods', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

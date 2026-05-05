@@ -40,6 +40,7 @@ const GoogleIcon = () => (
 )
 
 import { supabase } from '../lib/supabase';
+import { apiFetch } from '../lib/api';
 
 export default function Login({ onLogin, onBack }) {
   const [mode, setMode] = useState('login')
@@ -59,7 +60,7 @@ export default function Login({ onLogin, onBack }) {
     if (!email || !password) { setError('Isi email dan kata sandi!'); return }
     setLoading(true); setError('')
     try {
-      const resp = await fetch('/api/auth/login', {
+      const resp = await apiFetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -102,7 +103,7 @@ export default function Login({ onLogin, onBack }) {
     }
     setLoading(true); setError('')
     try {
-      const resp = await fetch('/api/auth/register', {
+      const resp = await apiFetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, name, goal }),
