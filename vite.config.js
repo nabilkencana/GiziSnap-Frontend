@@ -12,13 +12,13 @@ export default defineConfig({
     proxy: {
       // Semua request /api/* dari frontend diteruskan ke backend NestJS
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://gizisnap-backend-production.up.railway.app',
         changeOrigin: true,
         secure: false,
       },
       // Proxy uploaded food images dari backend
       '/uploads': {
-        target: 'http://localhost:3000',
+        target: 'https://gizisnap-backend-production.up.railway.app',
         changeOrigin: true,
         secure: false,
       },
