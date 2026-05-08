@@ -68,7 +68,7 @@ export default function Landing({ onProceed }) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen w-full bg-[var(--background)] overflow-y-auto overflow-x-hidden font-sans text-[var(--text-main)]">
+    <div className="h-[100dvh] w-full bg-[var(--background)] overflow-y-auto overflow-x-hidden font-sans text-[var(--text-main)] block">
       
       {/* ── Top Navbar ── */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-[var(--border)] py-3' : 'bg-transparent py-5'}`}>
@@ -105,21 +105,59 @@ export default function Landing({ onProceed }) {
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div 
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden flex flex-col gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
           >
-            <a href="#fitur" onClick={(e) => handleSmoothScroll(e, 'fitur')} className="text-2xl font-bold text-[var(--text-main)] border-b border-[var(--border)] pb-4">Fitur Unggulan</a>
-            <a href="#cara-kerja" onClick={(e) => handleSmoothScroll(e, 'cara-kerja')} className="text-2xl font-bold text-[var(--text-main)] border-b border-[var(--border)] pb-4">Cara Kerja</a>
-            <a href="#penjelasan" onClick={(e) => handleSmoothScroll(e, 'penjelasan')} className="text-2xl font-bold text-[var(--text-main)] border-b border-[var(--border)] pb-4">Mengapa GiziSnap?</a>
-            <button 
-              onClick={() => { setMobileMenuOpen(false); onProceed(); }}
-              className="mt-4 px-6 py-4 rounded-xl bg-[var(--primary)] text-white font-black text-lg text-center"
+            <motion.div 
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+              className="absolute top-0 right-0 bottom-0 w-[80%] max-w-[320px] bg-white/95 backdrop-blur-xl shadow-[-20px_0_40px_rgba(0,0,0,0.05)] pt-32 px-8 flex flex-col border-l border-white/50 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
             >
-              Mulai Sekarang Gratis
-            </button>
+              {/* Subtle ambient color blobs to remove the 'flat' feel */}
+              <div className="absolute top-0 right-0 w-full h-full pointer-events-none -z-10">
+                <div className="absolute top-[-10%] right-[-20%] w-64 h-64 bg-emerald-200/40 rounded-full blur-3xl mix-blend-multiply"></div>
+                <div className="absolute bottom-[20%] left-[-20%] w-72 h-72 bg-teal-100/50 rounded-full blur-3xl mix-blend-multiply"></div>
+              </div>
+
+              <div className="flex flex-col gap-8 relative z-10">
+                {[
+                  { id: 'fitur', label: 'Fitur Unggulan' },
+                  { id: 'cara-kerja', label: 'Cara Kerja' },
+                  { id: 'penjelasan', label: 'Mengapa GiziSnap?' }
+                ].map((item) => (
+                  <a 
+                    key={item.id}
+                    href={`#${item.id}`} 
+                    onClick={(e) => handleSmoothScroll(e, item.id)} 
+                    className="group relative text-3xl font-black tracking-tighter text-slate-800 transition-colors hover:text-emerald-600"
+                  >
+                    {item.label}
+                    <span className="absolute -bottom-2 left-0 w-0 h-1.5 bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-300 group-hover:w-1/3 rounded-full"></span>
+                  </a>
+                ))}
+              </div>
+              
+              <div className="mt-auto pb-12 relative z-10">
+                <div className="bg-gradient-to-br from-emerald-50/90 to-teal-50/90 p-6 rounded-[2rem] border border-white shadow-[0_8px_30px_rgba(16,185,129,0.06)] relative overflow-hidden group">
+                  <div className="absolute top-[-20px] right-[-20px] w-24 h-24 bg-emerald-200/30 rounded-full blur-xl pointer-events-none transition-transform group-hover:scale-110"></div>
+                  <p className="text-emerald-900/70 text-[13px] mb-5 font-bold leading-relaxed relative z-10">
+                    Siap memulai gaya hidup sehat yang sesungguhnya?
+                  </p>
+                  <button 
+                    onClick={() => { setMobileMenuOpen(false); onProceed(); }}
+                    className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-black text-[15px] shadow-xl shadow-emerald-500/25 active:scale-95 transition-all relative z-10"
+                  >
+                    Mulai Gratis
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

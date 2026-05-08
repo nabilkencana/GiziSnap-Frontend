@@ -544,7 +544,7 @@ export default function Scanner({ userId }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 34 }}
-        className="bg-white/80 backdrop-blur-2xl rounded-t-3xl lg:rounded-none px-5 pt-5 pb-8 shadow-2xl lg:shadow-none lg:h-full lg:overflow-y-auto"
+        className="bg-white/80 backdrop-blur-2xl rounded-t-3xl lg:rounded-none px-5 pt-5 pb-8 shadow-2xl lg:shadow-none h-auto max-h-[85vh] overflow-y-auto overscroll-contain lg:max-h-none lg:h-full lg:overflow-y-auto"
       >
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4 lg:hidden" />
 
