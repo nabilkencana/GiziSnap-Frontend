@@ -544,7 +544,7 @@ export default function Scanner({ userId }) {
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 60, opacity: 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 34 }}
-        className="bg-white/80 backdrop-blur-2xl rounded-t-3xl lg:rounded-none px-5 pt-5 pb-8 shadow-2xl lg:shadow-none h-auto max-h-[85vh] overflow-y-auto overscroll-contain lg:max-h-none lg:h-full lg:overflow-y-auto"
+        className="bg-white/80 backdrop-blur-2xl rounded-t-3xl lg:rounded-none px-5 pt-5 pb-8 shadow-2xl lg:shadow-none w-full"
       >
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4 lg:hidden" />
 
@@ -681,7 +681,8 @@ export default function Scanner({ userId }) {
         </div>
 
         {/* RIGHT: Result Column */}
-        <div className="absolute inset-x-0 bottom-0 z-50 lg:static lg:w-1/2 xl:w-[55%] flex flex-col lg:h-full lg:bg-white/30 lg:backdrop-blur-sm lg:overflow-y-auto pointer-events-none lg:pointer-events-auto">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto lg:static lg:relative lg:w-1/2 xl:w-[55%] lg:h-full lg:overflow-hidden lg:bg-white/30 lg:backdrop-blur-sm pointer-events-auto"
+          style={{ height: 'min(85vh, calc(100vh - 2rem))', scrollBehavior: 'smooth' }}>
           {/* Desktop idle placeholder */}
           {stage !== 'scanned' && (
             <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-center p-10 h-full">
@@ -702,7 +703,7 @@ export default function Scanner({ userId }) {
           )}
 
           {/* Result card (Mobile & Desktop) */}
-          <div className="pointer-events-auto flex-1 lg:p-0">
+          <div className="pointer-events-auto w-full lg:h-full lg:overflow-y-auto lg:p-0">
             <AnimatePresence mode="wait">
               {renderResult()}
             </AnimatePresence>
