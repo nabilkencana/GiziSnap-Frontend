@@ -10,17 +10,17 @@ import BottomNav from './components/BottomNav'
 import Sidebar from './components/Sidebar'
 
 const pageVariants = {
-  enter:  (d) => ({ x: d > 0 ? 60 : -60, opacity: 0, scale: 0.97 }),
+  enter: (d) => ({ x: d > 0 ? 60 : -60, opacity: 0, scale: 0.97 }),
   center: { x: 0, opacity: 1, scale: 1 },
-  exit:   (d) => ({ x: d < 0 ? 60 : -60, opacity: 0, scale: 0.97 }),
+  exit: (d) => ({ x: d < 0 ? 60 : -60, opacity: 0, scale: 0.97 }),
 }
 const pageTransition = { type: 'spring', stiffness: 380, damping: 36 }
 const NAV_ORDER = ['dashboard', 'scanner', 'wiki']
 
 const goalToPersona = {
-  WEIGHT_LOSS:   'weightloss',
+  WEIGHT_LOSS: 'weightloss',
   DIABETES_CARE: 'diabetes',
-  BODYBUILDING:  'bodybuilder',
+  BODYBUILDING: 'bodybuilder',
 }
 
 const EMPTY_MACROS = { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 }
@@ -41,7 +41,7 @@ export default function App() {
   })
 
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [prevTab, setPrevTab]     = useState('dashboard')
+  const [prevTab, setPrevTab] = useState('dashboard')
   // Auto-detect OAuth redirect: Supabase menambah #access_token di URL setelah Google login
   const [unauthView, setUnauthView] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -53,7 +53,7 @@ export default function App() {
     return 'landing';
   })
   // Macros shared with Sidebar — fetched by Dashboard, lifted here
-  const [macros, setMacros]       = useState(EMPTY_MACROS)
+  const [macros, setMacros] = useState(EMPTY_MACROS)
 
   const direction = NAV_ORDER.indexOf(activeTab) - NAV_ORDER.indexOf(prevTab)
 
@@ -83,7 +83,7 @@ export default function App() {
     apiFetch(`/api/daily-logs/today/${user.id}`)
       .then(r => r.json())
       .then(d => { if (d.macros) setMacros(d.macros) })
-      .catch(() => {})
+      .catch(() => { })
   }, [user?.id, activeTab]) // refetch when switching tabs
 
   // ── Supabase Google Auth Listener ────────────────────────────────────────────
@@ -101,7 +101,7 @@ export default function App() {
             const parsed = JSON.parse(stored);
             setUser(prev => prev ?? parsed);
             setPersona(prev => prev ?? (goalToPersona[parsed.goal] ?? null));
-          } catch {}
+          } catch { }
           return;
         }
 
@@ -163,14 +163,14 @@ export default function App() {
       const res = await apiFetch(`/api/auth/${user.id}/goal`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ goal })
       });
       if (res.ok) {
-         const updatedUser = { ...user, goal };
-         setUser(updatedUser);
-         localStorage.setItem('gizisnapUser', JSON.stringify(updatedUser));
+        const updatedUser = { ...user, goal };
+        setUser(updatedUser);
+        localStorage.setItem('gizisnapUser', JSON.stringify(updatedUser));
       }
     } catch (e) {
       console.error("Gagal simpan goal:", e)
@@ -197,8 +197,8 @@ export default function App() {
         />
       )
       case 'scanner': return <Scanner userId={userId} />
-      case 'wiki':    return <WikiGizi userId={userId} />
-      default:        return <Dashboard persona={persona} onPersonaChange={handleOnboardingSelect} userId={userId} user={user} onLogout={handleLogout} onMacrosUpdate={setMacros} />
+      case 'wiki': return <WikiGizi userId={userId} />
+      default: return <Dashboard persona={persona} onPersonaChange={handleOnboardingSelect} userId={userId} user={user} onLogout={handleLogout} onMacrosUpdate={setMacros} />
     }
   }
 
