@@ -31,7 +31,7 @@ const compressImage = async (base64Str) => {
 const MODES = [
   { id: 'camera', label: 'Kamera', icon: Camera },
   { id: 'upload', label: 'Upload', icon: ImagePlus },
-  { id: 'url',    label: 'URL',    icon: Link2 },
+  { id: 'url', label: 'URL', icon: Link2 },
 ]
 
 // Food category color map
@@ -159,19 +159,19 @@ function TotalNutrition({ totals, foodCount }) {
 }
 
 export default function Scanner({ userId }) {
-  const [mode, setMode]         = useState('camera')
-  const [stage, setStage]       = useState('idle')
-  const [saved, setSaved]       = useState(false)
-  const [result, setResult]     = useState(null)
+  const [mode, setMode] = useState('camera')
+  const [stage, setStage] = useState('idle')
+  const [saved, setSaved] = useState(false)
+  const [result, setResult] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [urlInput, setUrlInput] = useState('')
-  const [preview, setPreview]   = useState(null)
+  const [preview, setPreview] = useState(null)
   const [isSaving, setIsSaving] = useState(false)
 
-  const videoRef  = useRef(null)
+  const videoRef = useRef(null)
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
-  const fileRef   = useRef(null)
+  const fileRef = useRef(null)
 
   const handleReset = useCallback(() => {
     streamRef.current?.getTracks().forEach(t => t.stop())
@@ -299,7 +299,7 @@ export default function Scanner({ userId }) {
   const renderInputArea = () => {
     if (mode === 'camera') {
       return (
-        <div className="relative flex-1 flex items-center justify-center overflow-hidden" style={{ minHeight: 320 }}>
+        <div className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: 0, height: '100%', flex: 1 }}>
           <div className="absolute inset-0 bg-gradient-to-br from-gray-100 via-white to-gray-50" />
           <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-emerald-100/50 rounded-full blur-3xl" />
           <div className="absolute bottom-1/3 right-1/4 w-32 h-32 bg-teal-100/50 rounded-full blur-3xl" />
@@ -421,8 +421,8 @@ export default function Scanner({ userId }) {
 
     if (mode === 'upload') {
       return (
-        <div className="flex-1 bg-white/60 backdrop-blur-xl border border-white/40 flex flex-col items-center justify-center p-6 gap-5 shadow-sm">
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        <div className="flex-1 bg-white/60 backdrop-blur-xl border border-white/40 flex flex-col items-center justify-center p-6 gap-5 shadow-sm overflow-y-auto">
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
           {preview && stage !== 'idle' ? (
             <div className="relative w-full max-w-xs lg:max-w-sm rounded-2xl overflow-hidden shadow-xl border border-gray-100">
               <img src={preview} alt="Preview" className="w-full object-cover max-h-60 lg:max-h-80" />
@@ -459,7 +459,7 @@ export default function Scanner({ userId }) {
           )}
           {(stage === 'idle' || stage === 'error') && (
             <motion.button whileTap={{ scale: 0.97 }} onClick={() => fileRef.current?.click()}
-               className="w-full max-w-xs lg:max-w-sm py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 shadow-md shadow-emerald-500/20 text-white font-bold text-[14px] flex items-center justify-center gap-2 transition-colors">
+              className="w-full max-w-xs lg:max-w-sm py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 shadow-md shadow-emerald-500/20 text-white font-bold text-[14px] flex items-center justify-center gap-2 transition-colors">
               <ImagePlus size={18} /> Pilih Gambar Makanan
             </motion.button>
           )}
@@ -469,7 +469,7 @@ export default function Scanner({ userId }) {
 
     // mode === 'url'
     return (
-      <div className="flex-1 bg-white/60 backdrop-blur-xl border border-white/40 flex flex-col items-center justify-center p-6 gap-5 shadow-sm">
+      <div className="flex-1 bg-white/60 backdrop-blur-xl border border-white/40 flex flex-col items-center justify-center p-4 gap-4 shadow-sm overflow-y-auto">
         {preview && stage !== 'idle' ? (
           <div className="relative w-full max-w-xs lg:max-w-sm rounded-2xl overflow-hidden shadow-xl border border-gray-100">
             <img src={preview} alt="Preview" className="w-full object-cover max-h-60 lg:max-h-80"
@@ -491,10 +491,11 @@ export default function Scanner({ userId }) {
           <p className="text-gray-700 text-[13px] font-semibold text-center">Masukkan URL gambar makanan</p>
           <div className="flex gap-2">
             <input type="url" value={urlInput} onChange={e => setUrlInput(e.target.value)}
-              placeholder="https://example.com/foto-makanan.jpg"
-              className="flex-1 bg-white text-gray-900 text-[13px] rounded-xl px-4 py-3 outline-none border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 placeholder-gray-400 transition-colors shadow-sm" />
+              placeholder="https://example.com/food.jpg"
+              autoCapitalize="none" autoCorrect="off" spellCheck={false}
+              className="flex-1 bg-white text-gray-900 text-[13px] rounded-xl px-3 py-3 outline-none border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 placeholder-gray-400 transition-colors shadow-sm min-w-0" />
             {urlInput && (
-              <button onClick={() => setUrlInput('')} className="bg-gray-100 hover:bg-gray-200 border border-gray-200 shadow-sm rounded-xl px-3 transition-colors">
+              <button onClick={() => setUrlInput('')} className="bg-gray-100 hover:bg-gray-200 border border-gray-200 shadow-sm rounded-xl px-3 flex-shrink-0 transition-colors">
                 <X size={14} className="text-gray-500" />
               </button>
             )}
@@ -566,16 +567,15 @@ export default function Scanner({ userId }) {
             </div>
             {(() => {
               const isDrink = hasData && foods.some(f =>
-                ['teh','kopi','jus','susu','air','minuman','es batu','sirup','soda'].some(k =>
+                ['teh', 'kopi', 'jus', 'susu', 'air', 'minuman', 'es batu', 'sirup', 'soda'].some(k =>
                   f.detectedName.toLowerCase().includes(k)
                 )
               )
               const Icon = !hasData ? ScanSearch : isDrink ? GlassWater : Utensils
               return (
                 <div className="flex items-center gap-2 mt-1">
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    !hasData ? 'bg-gray-100' : isDrink ? 'bg-blue-100' : 'bg-emerald-100'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${!hasData ? 'bg-gray-100' : isDrink ? 'bg-blue-100' : 'bg-emerald-100'
+                    }`}>
                     <Icon size={16} className={!hasData ? 'text-gray-400' : isDrink ? 'text-blue-600' : 'text-emerald-600'} />
                   </div>
                   <h2 className="text-[17px] lg:text-[20px] font-black text-gray-900">
@@ -588,9 +588,8 @@ export default function Scanner({ userId }) {
           </div>
           <div className="flex flex-col gap-2">
             <motion.button whileTap={{ scale: 0.9 }} onClick={handleSave} disabled={isSaving || saved}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all flex-shrink-0 ${
-                saved ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-300'
-              }`}>
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all flex-shrink-0 ${saved ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-300'
+                }`}>
               {isSaving ? <><RefreshCw size={13} className="animate-spin" /> Menyimpan...</> : saved ? <><Check size={13} /> Tersimpan</> : 'Simpan'}
             </motion.button>
           </div>
@@ -637,7 +636,7 @@ export default function Scanner({ userId }) {
   // MAIN RENDER
   // ═══════════════════════════════════════════════════════════════════════════
   return (
-    <div className="flex flex-col flex-1 bg-[#f8fbfa] overflow-hidden">
+    <div className="flex flex-col flex-1 bg-[#f8fbfa] overflow-hidden min-h-0">
       {/* Desktop Header */}
       <div className="hidden lg:flex items-center justify-between bg-white/60 backdrop-blur-xl border-b border-white/40 px-8 py-5">
         <div>
@@ -657,32 +656,42 @@ export default function Scanner({ userId }) {
         </div>
       </div>
 
-      {/* Desktop: Side-by-Side | Mobile: Stacked (Absolute Result) */}
-      <div className="flex-1 flex flex-col lg:flex-row relative">
+      {/* Desktop: Side-by-Side | Mobile: Stacked */}
+      <div className="flex-1 flex flex-col lg:flex-row relative min-h-0">
 
-        {/* LEFT: Input Column */}
-        <div className="w-full lg:w-1/2 xl:w-[45%] flex flex-col flex-1 lg:border-r lg:border-white/40 bg-transparent">
+        {/* LEFT: Input Column — full height on mobile, half on desktop */}
+        <div className="w-full lg:w-1/2 xl:w-[45%] flex flex-col lg:border-r lg:border-white/40 bg-transparent min-h-0"
+          style={{ flex: stage === 'scanned' ? '0 0 auto' : '1 1 0%' }}>
           {/* Mode Tabs */}
-          <div className="flex bg-white/40 backdrop-blur-md border-b border-white/40 pt-2 lg:pt-0 gap-0">
+          <div className="flex bg-white/40 backdrop-blur-md border-b border-white/40 flex-shrink-0 gap-0">
             {MODES.map(({ id, label, icon: Icon }) => (
               <button key={id} onClick={() => changeMode(id)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-3 lg:py-4 text-[12px] font-bold transition-all ${
-                  mode === id
+                className={`flex-1 flex items-center justify-center gap-1.5 py-3 lg:py-4 text-[12px] font-bold transition-all ${mode === id
                     ? 'bg-white/80 backdrop-blur-lg text-emerald-600 border-b-2 border-emerald-500'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-white/50 border-b-2 border-transparent'
-                }`}>
+                  }`}>
                 <Icon size={14} />
                 {label}
               </button>
             ))}
           </div>
 
-          {renderInputArea()}
+          {/* Input area — flex-1 so it fills remaining height */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {renderInputArea()}
+          </div>
         </div>
 
         {/* RIGHT: Result Column */}
-        <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto lg:static lg:relative lg:w-1/2 xl:w-[55%] lg:h-full lg:overflow-hidden lg:bg-white/30 lg:backdrop-blur-sm pointer-events-auto"
-          style={{ height: 'min(85vh, calc(100vh - 2rem))', scrollBehavior: 'smooth' }}>
+        {/* Mobile: fixed bottom sheet only when scanned. Desktop: always visible sidebar */}
+        <div
+          className={`lg:static lg:flex lg:flex-col lg:w-1/2 xl:w-[55%] lg:h-full lg:overflow-hidden lg:bg-white/30 lg:backdrop-blur-sm
+            ${ stage === 'scanned'
+              ? 'fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto pointer-events-auto'
+              : 'pointer-events-none lg:pointer-events-auto'
+            }`}
+          style={stage === 'scanned' ? { maxHeight: 'min(85vh, calc(100vh - 56px))', scrollBehavior: 'smooth' } : {}}
+        >
           {/* Desktop idle placeholder */}
           {stage !== 'scanned' && (
             <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-center p-10 h-full">
@@ -693,7 +702,7 @@ export default function Scanner({ userId }) {
               <p className="text-[13px] text-gray-300 max-w-xs leading-relaxed">
                 {stage === 'scanning'
                   ? 'AI Food Nutrition sedang mendeteksi semua item dalam foto...'
-                  : 'Upload atau foto makanan MBG-mu. AI Food Nutrition akan mendeteksi semua komponen sekaligus!'}
+                  : 'Upload atau foto makananmu. AI akan mendeteksi semua komponen sekaligus!'}
               </p>
               {stage === 'scanning' && (
                 <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
@@ -702,8 +711,8 @@ export default function Scanner({ userId }) {
             </div>
           )}
 
-          {/* Result card (Mobile & Desktop) */}
-          <div className="pointer-events-auto w-full lg:h-full lg:overflow-y-auto lg:p-0">
+          {/* Result card */}
+          <div className="pointer-events-auto w-full lg:h-full lg:overflow-y-auto">
             <AnimatePresence mode="wait">
               {renderResult()}
             </AnimatePresence>
