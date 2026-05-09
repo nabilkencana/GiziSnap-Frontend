@@ -574,14 +574,21 @@ export default function WikiGizi({ userId }) {
     : 0
 
   // ─ Image handler ─
+  const processImageFile = (file) => {
+    if (!file) return
+    setForm(f => ({ ...f, image: file }))
+    const reader = new FileReader()
+    reader.onload = (ev) => setImagePreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
+  const handleImageChange = (e) => {
+    processImageFile(e.target.files[0])
+  }
+
   const handleImageDrop = (e) => {
     e.preventDefault()
-    const file = e.dataTransfer?.files[0] || e.target.files[0]
-    if (!file) return
-    setForm(f => ({ ...f, image: file }))            // store File object
-    const reader = new FileReader()
-    reader.onload = (ev) => setImagePreview(ev.target.result)  // preview
-    reader.readAsDataURL(file)
+    processImageFile(e.dataTransfer?.files[0])
   }
 
   const validate = () => {
@@ -800,32 +807,51 @@ export default function WikiGizi({ userId }) {
             </div>
 
             {/* Category */}
-            <div className="bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white/40 shadow-sm relative">
+            <div className="bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white/40 shadow-sm" style={{ position: 'relative', zIndex: showCategory ? 50 : 'auto' }}>
               <FieldLabel required>Kategori</FieldLabel>
               <button type="button" onClick={() => setShowCategory(v => !v)}
-                className="w-full flex items-center justify-between py-1"
+                className={`w-full flex items-center justify-between py-2 px-3 rounded-xl transition-colors ${
+                  showCategory ? 'bg-emerald-50' : 'hover:bg-gray-50'
+                }`}
               >
-                <span className={`text-[14px] font-semibold ${form.category ? 'text-gray-800' : 'text-gray-300'}`}>
+                <span className={`text-[14px] font-semibold ${form.category ? 'text-gray-800' : 'text-gray-400'}`}>
                   {form.category || 'Pilih kategori...'}
                 </span>
                 <motion.div animate={{ rotate: showCategory ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                  <ChevronDown size={18} className="text-gray-400" />
+                  <ChevronDown size={18} className={showCategory ? 'text-emerald-500' : 'text-gray-400'} />
                 </motion.div>
               </button>
               <AnimatePresence>
                 {showCategory && (
-                  <motion.div
-                    initial={{ opacity: 0, scaleY: 0.9, y: -8 }} animate={{ opacity: 1, scaleY: 1, y: 0 }}
-                    exit={{ opacity: 0, scaleY: 0.9, y: -8 }} style={{ originY: 0 }}
-                    className="absolute left-4 right-4 top-full mt-1 bg-white/90 backdrop-blur-2xl border border-white/40 rounded-2xl shadow-xl z-20 overflow-hidden"
-                  >
-                    {CATEGORIES.map(c => (
-                      <button key={c} type="button"
-                        onClick={() => { update('category')(c); setShowCategory(false) }}
-                        className={`w-full text-left px-4 py-3 text-[13px] font-semibold transition-colors ${form.category === c ? 'bg-emerald-50 text-emerald-700' : 'text-gray-700 hover:bg-gray-50'}`}
-                      >{c}</button>
-                    ))}
-                  </motion.div>
+                  <>
+                    {/* Backdrop to close on outside click */}
+                    <div className="fixed inset-0 z-40" onClick={() => setShowCategory(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, scaleY: 0.92, y: -6 }}
+                      animate={{ opacity: 1, scaleY: 1, y: 0 }}
+                      exit={{ opacity: 0, scaleY: 0.92, y: -6 }}
+                      style={{ originY: 0 }}
+                      className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    >
+                      <div className="p-1.5">
+                        {CATEGORIES.map((c, i) => (
+                          <button key={c} type="button"
+                            onClick={() => { update('category')(c); setShowCategory(false) }}
+                            className={`w-full text-left px-4 py-2.5 rounded-xl text-[13px] font-semibold transition-colors ${
+                              form.category === c
+                                ? 'bg-emerald-500 text-white'
+                                : 'text-gray-700 hover:bg-emerald-50 hover:text-emerald-700'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              {form.category === c && <CheckCircle2 size={13} />}
+                              {c}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  </>
                 )}
               </AnimatePresence>
               <AnimatePresence>
@@ -840,37 +866,88 @@ export default function WikiGizi({ userId }) {
             {/* Image Upload */}
             <div>
               <FieldLabel>Foto (opsional)</FieldLabel>
-              <label htmlFor="food-image" onDragOver={e => e.preventDefault()} onDrop={handleImageDrop} className="block cursor-pointer">
-                <input id="food-image" type="file" accept="image/*" onChange={handleImageDrop} className="hidden" />
-                <motion.div whileTap={{ scale: 0.98 }}
-                  className="relative rounded-2xl border-2 border-dashed border-emerald-200/50 bg-emerald-50/40 backdrop-blur-sm overflow-hidden" style={{ minHeight: 100 }}
-                >
-                  <AnimatePresence mode="wait">
-                    {imagePreview ? (
-                      <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="relative">
-                        <img src={imagePreview} alt="Preview" className="w-full h-36 object-cover" />
-                        <button type="button"
-                          onClick={e => { e.preventDefault(); setImagePreview(null); setForm(f => ({ ...f, image: null })) }}
-                          className="absolute top-2 right-2 w-7 h-7 bg-black/60 rounded-full flex items-center justify-center"
-                        ><X size={13} className="text-white" /></button>
-                        <div className="absolute bottom-2 left-2 bg-emerald-500/90 rounded-full px-3 py-1">
-                          <span className="text-white text-[11px] font-bold">✓ Foto dipilih</span>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div key="placeholder" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                        className="flex flex-col items-center justify-center py-6 gap-2"
+              {/* Hidden input */}
+              <input
+                id="food-image"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              <motion.div
+                whileTap={{ scale: 0.99 }}
+                onDragOver={e => e.preventDefault()}
+                onDrop={handleImageDrop}
+                className={`relative rounded-2xl border-2 border-dashed overflow-hidden transition-colors ${
+                  imagePreview
+                    ? 'border-emerald-300 bg-emerald-50/30'
+                    : 'border-emerald-200 bg-emerald-50/40 hover:border-emerald-400 hover:bg-emerald-50/60'
+                }`}
+                style={{ minHeight: 120 }}
+              >
+                <AnimatePresence mode="wait">
+                  {imagePreview ? (
+                    <motion.div
+                      key="preview"
+                      initial={{ opacity: 0, scale: 0.97 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="relative"
+                    >
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-44 object-cover"
+                      />
+                      {/* Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      {/* Remove button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setImagePreview(null)
+                          setForm(f => ({ ...f, image: null }))
+                          // reset input so same file can be re-selected
+                          const inp = document.getElementById('food-image')
+                          if (inp) inp.value = ''
+                        }}
+                        className="absolute top-2 right-2 w-8 h-8 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
                       >
-                        <div className="w-11 h-11 rounded-2xl bg-emerald-100 flex items-center justify-center">
-                          <ImagePlus size={20} className="text-emerald-500" />
-                        </div>
-                        <p className="text-[13px] font-semibold text-emerald-600">Ketuk atau seret foto</p>
-                        <p className="text-[11px] text-gray-400">JPG, PNG, WEBP (max 5MB)</p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </label>
+                        <X size={14} className="text-white" />
+                      </button>
+                      {/* Success badge */}
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-emerald-500/90 backdrop-blur-sm rounded-full px-3 py-1">
+                        <CheckCircle2 size={12} className="text-white" />
+                        <span className="text-white text-[11px] font-bold">Foto siap diupload</span>
+                      </div>
+                      {/* Replace prompt */}
+                      <label
+                        htmlFor="food-image"
+                        className="absolute bottom-3 right-3 cursor-pointer bg-white/20 backdrop-blur-sm border border-white/40 rounded-full px-3 py-1"
+                      >
+                        <span className="text-white text-[10px] font-semibold">Ganti</span>
+                      </label>
+                    </motion.div>
+                  ) : (
+                    <motion.label
+                      key="placeholder"
+                      htmlFor="food-image"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center justify-center py-8 gap-2 cursor-pointer"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                        <ImagePlus size={22} className="text-emerald-500" />
+                      </div>
+                      <p className="text-[13px] font-semibold text-emerald-600">Ketuk untuk pilih foto</p>
+                      <p className="text-[11px] text-gray-400">atau seret & lepas di sini</p>
+                      <p className="text-[10px] text-gray-300">JPG, PNG, WEBP — maks 5 MB</p>
+                    </motion.label>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </div>
 
             {/* Nutrition Grid */}

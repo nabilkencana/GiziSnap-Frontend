@@ -8,6 +8,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: true,  // expose ke jaringan lokal (0.0.0.0)
     port: 5173,
     proxy: {
       // Semua request /api/* dari frontend diteruskan ke backend NestJS
