@@ -25,7 +25,6 @@ const goalToPersona = {
 
 const EMPTY_MACROS = { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0 }
 
-import { supabase } from './lib/supabase';
 import { apiFetch } from './lib/api';
 
 export default function App() {
@@ -42,16 +41,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [prevTab, setPrevTab] = useState('dashboard')
-  // Auto-detect OAuth redirect: Supabase menambah #access_token di URL setelah Google login
-  const [unauthView, setUnauthView] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash;
-      if (hash.includes('access_token') || hash.includes('error_description')) {
-        return 'login'; // Ada OAuth callback, jangan tampilkan landing
-      }
-    }
-    return 'landing';
-  })
+  const [unauthView, setUnauthView] = useState('landing')
   // Macros shared with Sidebar — fetched by Dashboard, lifted here
   const [macros, setMacros] = useState(EMPTY_MACROS)
 
@@ -68,13 +58,11 @@ export default function App() {
     setPersona(goalToPersona[userData.goal] ?? null)
   }
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     localStorage.removeItem('gizisnapUser')
     setUser(null)
     setPersona(null)
     setMacros(EMPTY_MACROS)
-    // Logout dari supabase juga
-    await supabase.auth.signOut()
   }
 
   // ── Fetch macros for sidebar (and Dashboard will also fetch its own) ─────────
@@ -85,65 +73,6 @@ export default function App() {
       .then(d => { if (d.macros) setMacros(d.macros) })
       .catch(() => { })
   }, [user?.id, activeTab]) // refetch when switching tabs
-
-  // ── Supabase Google Auth Listener ────────────────────────────────────────────
-  useEffect(() => {
-    let isSyncing = false;
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        if (isSyncing) return;
-
-        // Kalau sudah ada data di localStorage, restore state saja (refresh / navigasi)
-        const stored = localStorage.getItem('gizisnapUser');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            setUser(prev => prev ?? parsed);
-            setPersona(prev => prev ?? (goalToPersona[parsed.goal] ?? null));
-          } catch { }
-          return;
-        }
-
-        // Belum ada user → ini Google OAuth callback baru, sync ke backend
-        isSyncing = true;
-        try {
-          const email = session.user.email;
-          const name =
-            session.user.user_metadata?.full_name ||
-            session.user.user_metadata?.name ||
-            email?.split('@')[0] ||
-            'Pengguna Google';
-
-          const res = await apiFetch('/api/auth/google', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, name }),
-          });
-          const data = await res.json();
-          if (res.ok) {
-            localStorage.setItem('gizisnapUser', JSON.stringify(data));
-            handleLogin(data);
-          } else {
-            console.error('Backend Google sync gagal:', data);
-          }
-        } catch (e) {
-          console.error('Gagal sinkronisasi backend GiziSnap:', e);
-        } finally {
-          isSyncing = false;
-        }
-      } else if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('gizisnapUser');
-        setUser(null);
-        setPersona(null);
-        setMacros(EMPTY_MACROS);
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user) {
     if (unauthView === 'landing') {

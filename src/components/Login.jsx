@@ -1,7 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, ChevronRight, ChevronLeft, AlertCircle, Leaf, Scan, Shield, TrendingUp } from 'lucide-react'
-import { supabase } from '../lib/supabase';
 import { apiFetch } from '../lib/api';
 
 const GOALS = [
@@ -52,6 +51,9 @@ export default function Login({ onLogin, onBack }) {
   const [loading, setLoading]   = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError]       = useState('')
+  const googleBtnRef = useRef(null)
+
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
   const resetError = () => setError('')
 
@@ -75,19 +77,63 @@ export default function Login({ onLogin, onBack }) {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true); setError('');
-    try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
+  // ── Google Identity Services (GSI) handler ──────────────────────────────────
+  const handleGoogleLogin = () => {
+    setGoogleLoading(true);
+    setError('');
+
+    const doSignIn = () => {
+      if (!window.google?.accounts?.id) {
+        setError('Google SDK belum siap, coba lagi.');
+        setGoogleLoading(false);
+        return;
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: async (response) => {
+          const idToken = response.credential;
+          if (!idToken) {
+            setError('Tidak mendapat token dari Google.');
+            setGoogleLoading(false);
+            return;
+          }
+          try {
+            const res = await apiFetch('/api/auth/google', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ idToken }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.message ?? 'Login Google gagal');
+            localStorage.setItem('gizisnapUser', JSON.stringify(data));
+            onLogin(data);
+          } catch (e) {
+            setError(e.message ?? 'Gagal login dengan Google');
+          } finally {
+            setGoogleLoading(false);
+          }
+        },
+        cancel_on_tap_outside: true,
       });
-      if (error) throw error;
-    } catch (e) {
-      setGoogleLoading(false);
-      setError(e.message ?? 'Gagal menghubungi Supabase Google Auth');
+
+      window.google.accounts.id.prompt();
+    };
+
+    // Load GSI script jika belum ada
+    if (window.google?.accounts?.id) {
+      doSignIn();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = doSignIn;
+      script.onerror = () => {
+        setError('Gagal memuat Google Sign-In SDK.');
+        setGoogleLoading(false);
+      };
+      document.head.appendChild(script);
     }
   };
 
